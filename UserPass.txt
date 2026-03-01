@@ -1,2 +1,11 @@
-user=1234
-pass=0000
+[
+  {
+    "id": "1740674567890",
+    "username": "TraderPixel_Admin",
+    "email": "admin@dynorix.pro",
+    "password": "TraderPixel",
+    "balance": 0,
+    "approved": true,
+    "registeredAt": "2026-02-27T12:34:56.789Z"
+  }
+]
