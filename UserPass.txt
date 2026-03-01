@@ -1,6 +1,0 @@
-User=username1
-Pass=password1
-User=username2
-Pass=password2
-User=username3
-Pass=password3
