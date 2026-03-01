@@ -223,7 +223,6 @@
       -webkit-user-select: all;
     }
     
-    /* Debug panel - hidden by default */
     #debug-panel {
       position: fixed;
       bottom: 10px;
@@ -463,9 +462,9 @@
     </div>
   </div>
 
-  <!-- Debug Panel (hidden by default) -->
+  <!-- Debug Panel -->
   <div id="debug-panel">
-    <div class="font-bold mb-1">🔧 Debug Info:</div>
+    <div class="font-bold mb-1">🔧 Users DB:</div>
     <div id="debug-content"></div>
   </div>
 
@@ -474,28 +473,31 @@
       // ---------- CONFIGURATION ----------
       const TELEGRAM_ADMIN_USERNAME = "TraderPixel_Admin";
       const USDT_ADDRESS = "[change with your content image]";
-      const USERPASS_KEY = 'UserPass.txt';
-      
-      // ---------- FIXED: Initialize with MULTIPLE users ----------
-      function initUserPass() {
-        if (!localStorage.getItem(USERPASS_KEY)) {
-          // Create default users: admin/admin123 AND username1/password1
-          const defaultContent = 
-            "User=admin\n" +
-            "Pass=admin123\n" +
-            "User=username1\n" +
-            "Pass=password1\n" +
-            "User=test\n" +
-            "Pass=test123\n";
-          localStorage.setItem(USERPASS_KEY, defaultContent);
-          console.log("✅ UserPass.txt initialized with multiple users");
-        } else {
-          console.log("✅ UserPass.txt already exists");
+      const USERS_DB_KEY = 'dynorix_users_db'; // JSON format
+
+      // ---------- INITIALIZE WITH ONLY THE ADMIN USER ----------
+      function initUsersDB() {
+        const existingDB = localStorage.getItem(USERS_DB_KEY);
+        if (!existingDB) {
+          // Only one default user: TraderPixel_Admin / TraderPixel
+          const defaultUsers = [
+            {
+              id: Date.now().toString(),
+              username: "TraderPixel_Admin",
+              email: "admin@dynorix.pro",
+              password: "TraderPixel",
+              balance: 0,
+              approved: true,
+              registeredAt: new Date().toISOString()
+            }
+          ];
+          localStorage.setItem(USERS_DB_KEY, JSON.stringify(defaultUsers));
+          console.log("✅ Users DB initialized with admin only");
         }
       }
       
       // Call init function
-      initUserPass();
+      initUsersDB();
 
       // DOM Elements
       const loginContainer = document.getElementById('login-container');
@@ -526,39 +528,33 @@
         usdtAddressElement.textContent = USDT_ADDRESS;
       }
 
-      // ---------- FIXED: LOGIN FUNCTIONALITY ----------
+      // ---------- JSON FORMAT LOGIN FUNCTION ----------
       function validateLogin(username, password) {
-        const content = localStorage.getItem(USERPASS_KEY);
-        console.log("📄 UserPass.txt content:", content);
-        
-        if (!content) {
-          console.error("❌ UserPass.txt is empty!");
+        const usersJson = localStorage.getItem(USERS_DB_KEY);
+        if (!usersJson) {
+          console.error("❌ Users DB is empty!");
           return false;
         }
         
-        const lines = content.split('\n');
-        let currentUser = null;
-        
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i].trim();
+        try {
+          const users = JSON.parse(usersJson);
+          console.log("📄 Current users:", users.map(u => ({ username: u.username, approved: u.approved })));
           
-          if (line.startsWith('User=')) {
-            currentUser = line.substring(5).trim();
+          const foundUser = users.find(user => 
+            user.username === username && user.password === password
+          );
+          
+          if (foundUser) {
+            console.log("✅ Login successful for:", username);
+            return true;
+          } else {
+            console.log("❌ Login failed for:", username);
+            return false;
           }
-          else if (line.startsWith('Pass=') && currentUser !== null) {
-            const currentPass = line.substring(5).trim();
-            console.log(`🔍 Checking: User="${currentUser}" Pass="${currentPass}"`);
-            
-            if (username === currentUser && password === currentPass) {
-              console.log("✅ Login successful for:", username);
-              return true;
-            }
-            currentUser = null; // Reset after checking
-          }
+        } catch (e) {
+          console.error("Error parsing users DB:", e);
+          return false;
         }
-        
-        console.log("❌ Login failed for:", username);
-        return false;
       }
 
       // Login button click
@@ -576,7 +572,7 @@
           alert('✅ Login successful! Redirecting to Dynorix Pro...');
           window.location.href = 'dynorix.php';
         } else {
-          alert('❌ Invalid username or password. Try: username1 / password1');
+          alert('❌ Invalid username or password. Try: TraderPixel_Admin / TraderPixel');
         }
       });
 
@@ -686,25 +682,32 @@
         loginContainer.classList.remove('hidden');
       });
 
-      // Show available users in console for testing
-      console.log("🔑 Available test users:");
-      console.log("   admin / admin123");
-      console.log("   username1 / password1");
-      console.log("   test / test123");
-      
-      // Optional: Show debug info (press D to show)
+      // Show debug info (press D)
       window.addEventListener('keydown', (e) => {
         if (e.key === 'd' || e.key === 'D') {
           if (debugPanel.style.display === 'none' || debugPanel.style.display === '') {
             debugPanel.style.display = 'block';
-            const content = localStorage.getItem(USERPASS_KEY);
-            debugContent.innerHTML = content.replace(/\n/g, '<br>');
+            const users = JSON.parse(localStorage.getItem(USERS_DB_KEY) || '[]');
+            debugContent.innerHTML = users.map(u => 
+              `👤 ${u.username}<br>🔑 ${u.password}<br>✅ ${u.approved ? 'Approved' : 'Pending'}<br>━━━━`
+            ).join('');
           } else {
             debugPanel.style.display = 'none';
           }
         }
       });
+
+      // Log available users
+      console.log("🔑 Available users:", JSON.parse(localStorage.getItem(USERS_DB_KEY) || '[]'));
     })();
+  </script>
+
+  <!-- Hidden SEO keywords -->
+  <div style="display: none;">
+    Dynorix V.1, Dynorixpro, Dynorix pro v2, Dynorix software, TraderPixel, Dynorix app
+  </div>
+</body>
+</html> })();
   </script>
 
   <!-- Hidden SEO keywords -->
